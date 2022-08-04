@@ -2,7 +2,7 @@ package com.telefonica.nestedscrollwebview.helper
 
 import android.view.ViewGroup
 
-interface NestedScrollViewChild {
+interface NestedScrollingView {
     val view: ViewGroup
     fun getScrollRange(): Int
 

@@ -36,25 +36,29 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.view.NestedScrollingChild3;
+import androidx.core.view.NestedScrollingChildHelper;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.EdgeEffectCompat;
 
 /**
- * This class extracts the following functionality from NestedScrollView class (Android Support Library Compat 1.8.0):
+ * Purpose of this helper class is to extract the following functionality
+ * from NestedScrollView class (Android Support Library Compat 1.8.0), while keeping original
+ * code unaltered as much as possible:
  * * NestedScrollView.onTouchEvent(@NonNull MotionEvent ev) implementation
  * * NestedScrollView.computeScroll() implementation
- * * NestedScrollView NestedScrollingChild3 interface implementation
- * Views can delegate nested scrolling logic to this class, by implementing NestedChildView interface.
+ * * NestedScrollView NestedScrollingChild3 methods implementation
+ * Specific Views implementations can delegate these behaviours to this class, so this class
+ * is not forced to inherit from a specific View type.
  */
 public class NestedScrollViewHelper implements NestedScrollingChild3 {
 
-	private final NestedScrollViewChild nestedScrollViewChild;
+	private final NestedScrollingView nestedScrollingView;
 
 	public NestedScrollViewHelper(
-			NestedScrollViewChild nestedScrollViewChild,
+			NestedScrollingView nestedScrollingView,
 			@Nullable AttributeSet attrs
 	) {
-		this.nestedScrollViewChild = nestedScrollViewChild;
+		this.nestedScrollingView = nestedScrollingView;
 		init(getContext(), attrs);
 	}
 
@@ -123,7 +127,7 @@ public class NestedScrollViewHelper implements NestedScrollingChild3 {
 	 */
 	private static final int INVALID_POINTER = -1;
 
-	private androidx.core.view.NestedScrollingChildHelper mChildHelper;
+	private NestedScrollingChildHelper mChildHelper;
 
 	// NestedScrollView constructor
 	public void init(@NonNull Context context, @Nullable AttributeSet attrs/*, int defStyleAttr*/) {
@@ -141,7 +145,7 @@ public class NestedScrollViewHelper implements NestedScrollingChild3 {
 		a.recycle();
 		*/
 
-		mChildHelper = new androidx.core.view.NestedScrollingChildHelper(getView());
+		mChildHelper = new NestedScrollingChildHelper(getView());
 
 		// ...because why else would you be using this widget?
 		setNestedScrollingEnabled(true);
@@ -662,23 +666,23 @@ public class NestedScrollViewHelper implements NestedScrollingChild3 {
 	*/
 
 	private View getView() {
-		return nestedScrollViewChild.getView();
+		return nestedScrollingView.getView();
 	}
 
 	private Context getContext() {
-		return nestedScrollViewChild.getView().getContext();
+		return nestedScrollingView.getView().getContext();
 	}
 
 	private void setFocusable(boolean focusable) {
-		nestedScrollViewChild.getView().setFocusable(focusable);
+		nestedScrollingView.getView().setFocusable(focusable);
 	}
 
 	private void setDescendantFocusability(int focusability) {
-		nestedScrollViewChild.getView().setDescendantFocusability(focusability);
+		nestedScrollingView.getView().setDescendantFocusability(focusability);
 	}
 
 	private void setWillNotDraw(boolean willNotDraw) {
-		nestedScrollViewChild.getView().setWillNotDraw(willNotDraw);
+		nestedScrollingView.getView().setWillNotDraw(willNotDraw);
 	}
 
 	private int getChildCount() {
@@ -687,55 +691,55 @@ public class NestedScrollViewHelper implements NestedScrollingChild3 {
 
 	@Nullable
 	private ViewParent getParent() {
-		return nestedScrollViewChild.getView().getParent();
+		return nestedScrollingView.getView().getParent();
 	}
 
 	private int getScrollY() {
-		return nestedScrollViewChild.getView().getScrollY();
+		return nestedScrollingView.getView().getScrollY();
 	}
 
 	private int getScrollX() {
-		return nestedScrollViewChild.getView().getScrollY();
+		return nestedScrollingView.getView().getScrollY();
 	}
 
 	private int getOverScrollMode() {
-		return nestedScrollViewChild.getView().getOverScrollMode();
+		return nestedScrollingView.getView().getOverScrollMode();
 	}
 
 	private float getHeight() {
-		return nestedScrollViewChild.getView().getHeight();
+		return nestedScrollingView.getView().getHeight();
 	}
 
 	private float getWidth() {
-		return nestedScrollViewChild.getView().getWidth();
+		return nestedScrollingView.getView().getWidth();
 	}
 
 	private void invalidate() {
-		nestedScrollViewChild.getView().invalidate();
+		nestedScrollingView.getView().invalidate();
 	}
 
 	private int getScrollRange() {
-		return nestedScrollViewChild.getScrollRange();
+		return nestedScrollingView.getScrollRange();
 	}
 
 	private int computeHorizontalScrollRange() {
-		return nestedScrollViewChild.computeHorizontalScrollRange();
+		return nestedScrollingView.computeHorizontalScrollRange();
 	}
 
 	private int computeHorizontalScrollExtent() {
-		return nestedScrollViewChild.computeHorizontalScrollExtent();
+		return nestedScrollingView.computeHorizontalScrollExtent();
 	}
 
 	private int computeVerticalScrollRange() {
-		return nestedScrollViewChild.computeVerticalScrollRange();
+		return nestedScrollingView.computeVerticalScrollRange();
 	}
 
 	private int computeVerticalScrollExtent() {
-		return nestedScrollViewChild.computeVerticalScrollExtent();
+		return nestedScrollingView.computeVerticalScrollExtent();
 	}
 
 	private void onOverScrolled(int scrollX, int scrollY,
 								boolean clampedX, boolean clampedY) {
-		nestedScrollViewChild.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
+		nestedScrollingView.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
 	}
 }
