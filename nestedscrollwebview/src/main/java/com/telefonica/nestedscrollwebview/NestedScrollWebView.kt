@@ -12,7 +12,7 @@ import com.telefonica.nestedscrollwebview.helper.CoordinatorLayoutChildHelper
 import com.telefonica.nestedscrollwebview.helper.NestedScrollViewHelper
 import com.telefonica.nestedscrollwebview.helper.NestedScrollingView
 
-class NestedScrollWebView : WebView, NestedScrollingChild3 {
+open class NestedScrollWebView : WebView, NestedScrollingChild3 {
 
     private lateinit var nestedScrollingChildHelper: NestedScrollViewHelper
     private val coordinatorLayoutChildHelper: CoordinatorLayoutChildHelper =
