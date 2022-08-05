@@ -67,6 +67,10 @@ class NestedScrollWebView : WebView, NestedScrollingChild3 {
         nestedScrollingChildHelper = NestedScrollViewHelper(nestedScrollingView, attrs)
     }
 
+    fun setCoordinatorBottomMatchingBehaviourEnabled(enabled: Boolean) {
+        coordinatorLayoutChildHelper.setBottomMatchingBehaviourEnabled(enabled)
+    }
+
     // WebView touch events must be also processed by nested scrolling logic.
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -77,7 +81,7 @@ class NestedScrollWebView : WebView, NestedScrollingChild3 {
     // Scroll computation must be also processed by nested scrolling logic.
     override fun computeScroll() {
         nestedScrollingChildHelper.computeScroll()
-        coordinatorLayoutChildHelper.makeCoordinatorChildMatchItsBottomIfNeeded()
+        coordinatorLayoutChildHelper.computeBottomMarginIfNeeded()
         super.computeScroll()
     }
 

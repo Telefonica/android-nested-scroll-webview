@@ -10,6 +10,8 @@ class CoordinatorLayoutChildHelper {
     private var coordinatorChildView: View? = null
     private var coordinatorParentView: CoordinatorLayout? = null
 
+    private var isBottomMatchingBehaviourEnabled = false
+
     fun onViewAttached(view: View) {
         lastYPosition = null
         coordinatorChildView = null
@@ -28,8 +30,17 @@ class CoordinatorLayoutChildHelper {
         }
     }
 
-    fun makeCoordinatorChildMatchItsBottomIfNeeded() {
-        if (coordinatorChildView == null || coordinatorParentView == null) {
+    fun setBottomMatchingBehaviourEnabled(enabled: Boolean) {
+        if (isBottomMatchingBehaviourEnabled && !enabled) {
+            lastYPosition = null
+            resetBottomMargin()
+        }
+        isBottomMatchingBehaviourEnabled = enabled
+        computeBottomMarginIfNeeded()
+    }
+
+    fun computeBottomMarginIfNeeded() {
+        if (coordinatorChildView == null || coordinatorParentView == null || !isBottomMatchingBehaviourEnabled) {
             return
         }
 
@@ -49,6 +60,15 @@ class CoordinatorLayoutChildHelper {
                     bottomMargin += diff
                     coordinatorChildView!!.layoutParams = this
                 }
+            }
+        }
+    }
+
+    private fun resetBottomMargin() {
+        coordinatorChildView?.let { childView ->
+            with(childView.layoutParams as CoordinatorLayout.LayoutParams) {
+                bottomMargin = 0
+                childView.layoutParams = this
             }
         }
     }

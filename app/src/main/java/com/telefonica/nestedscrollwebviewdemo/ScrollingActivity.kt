@@ -12,6 +12,7 @@ import com.telefonica.nestedscrollwebviewdemo.databinding.ActivityScrollingBindi
 class ScrollingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityScrollingBinding
+    private var coordinatorBottomMatchingEnabled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +38,7 @@ class ScrollingActivity : AppCompatActivity() {
                     super.onPageFinished(view, url)
                 }
             }
-            loadUrl("https://www.stackoverflow.com/")
+            loadUrl(SCROLLABLE_WEB_CONTENT_URL)
         }
         binding.swiperefresh.setOnRefreshListener {
             binding.webView.reload()
@@ -50,14 +51,44 @@ class ScrollingActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.action_set_parent_bottom_matching_behaviour)
+            ?.isVisible = !coordinatorBottomMatchingEnabled
+        menu?.findItem(R.id.action_set_regular_behaviour)
+            ?.isVisible = coordinatorBottomMatchingEnabled
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_set_parent_bottom_matching_behaviour -> {
+                binding.webView.apply {
+                    setCoordinatorBottomMatchingBehaviourEnabled(true)
+                    loadUrl(SCROLLABLE_WEB_CONTENT_WITH_FOOTER_URL)
+                }
+                coordinatorBottomMatchingEnabled = true
+                true
+            }
+            R.id.action_set_regular_behaviour -> {
+                binding.webView.apply {
+                    setCoordinatorBottomMatchingBehaviourEnabled(false)
+                    loadUrl(SCROLLABLE_WEB_CONTENT_URL)
+                }
+                coordinatorBottomMatchingEnabled = false
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private companion object {
+        const val SCROLLABLE_WEB_CONTENT_URL =
+            "file:///android_asset/scrollable_web_content.html"
+        const val SCROLLABLE_WEB_CONTENT_WITH_FOOTER_URL =
+            "file:///android_asset/scrollable_web_content_with_footer.html"
     }
 }

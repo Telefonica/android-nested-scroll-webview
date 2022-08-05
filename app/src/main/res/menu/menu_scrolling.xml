@@ -3,8 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.telefonica.nestedscrollwebviewdemo.ScrollingActivity">
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:id="@+id/action_set_parent_bottom_matching_behaviour"
+        android:title="@string/action_set_coordinator_bottom_matching_behaviour"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_set_regular_behaviour"
+        android:title="@string/action_set_regular_behaviour"
         app:showAsAction="never" />
 </menu>
