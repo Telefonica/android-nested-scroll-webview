@@ -31,10 +31,29 @@ class NestedScrollWebView : WebView, NestedScrollingChild3 {
         attrs,
         defStyle
     ) {
-        init(attrs)
+        init(attrs, defStyle)
     }
 
-    private fun init(attrs: AttributeSet? = null) {
+    private fun init(attrs: AttributeSet? = null, defStyle: Int? = null) {
+        if (attrs != null) {
+            val styledAttrs = context.theme.obtainStyledAttributes(
+                attrs,
+                R.styleable.NestedScrollWebView,
+                defStyle ?: 0,
+                0
+            )
+            try {
+                coordinatorLayoutChildHelper.setBottomMatchingBehaviourEnabled(
+                    styledAttrs.getBoolean(
+                        R.styleable.NestedScrollWebView_coordinatorBottomMatchingEnabled,
+                        false
+                    )
+                )
+            } finally {
+                styledAttrs.recycle()
+            }
+        }
+
         overScrollMode = OVER_SCROLL_NEVER
         val nestedScrollingView = object : NestedScrollingView {
             override val view: ViewGroup =
