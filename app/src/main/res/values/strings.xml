@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Nested Scroll WebView Demo</string>
+    <string name="scrolling_activity_name">Nested Webview</string>
+
+    <string name="action_set_coordinator_bottom_matching_behaviour">Match coordinator bottom behaviour</string>
+    <string name="action_set_regular_behaviour">Regular behaviour</string>
+</resources>
