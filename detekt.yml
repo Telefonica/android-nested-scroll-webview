@@ -1,0 +1,32 @@
+build:
+  maxIssues: 0
+  weights:
+    complexity: 2
+    formatting: 1
+    LongParameterList: 1
+    comments: 1
+
+complexity:
+  TooManyFunctions:
+    active: false
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+
+empty-blocks:
+  EmptyFunctionBlock:
+    active: false
+style:
+  MagicNumber:
+    active: false
+  NewLineAtEndOfFile:
+    active: false
+  UnusedPrivateMember:
+    active: false
+  WildcardImport:
+    active: false
+
+exceptions:
+  TooGenericExceptionThrown:
+    active: false

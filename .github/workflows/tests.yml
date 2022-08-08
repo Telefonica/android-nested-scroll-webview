@@ -13,13 +13,6 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-#      - name: Assemble
-#        run: ./gradlew assembleDebug
-#      - name: Lint
-#        run: ./gradlew lint
-#      - name: Unit Tests
-#        run: ./gradlew test
-
       ## Build all our Build Types at once ##
       - name: Build all artifacts
         id: buildAllApks
