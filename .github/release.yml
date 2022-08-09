@@ -1,0 +1,17 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - tuentisre
+  categories:
+    - title: Breaking Changes 🛠
+      labels:
+        - breaking-change
+    - title: New Features 🎉
+      labels:
+        - enhancement
+        - new-feature
+    - title: Other Changes
+      labels:
+        - "*"

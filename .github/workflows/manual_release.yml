@@ -1,0 +1,25 @@
+name: "Release manually"
+on:
+  workflow_dispatch:
+    inputs:
+      libraryVersion:
+        description: "Library version"
+        required: true
+jobs:
+  manual-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Build library
+        run: 'bash ./gradlew clean :nestedscrollwebview:assembleRelease'
+
+      - name: Release library manually
+        env:
+          MOBILE_MAVENCENTRAL_USER: ${{ secrets.MOBILE_MAVENCENTRAL_USER }}
+          MOBILE_MAVENCENTRAL_PASSWORD: ${{ secrets.MOBILE_MAVENCENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGKEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGPASSWORD }}
+          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGKEYID }}
+        run: "bash ./gradlew publishReleasePublicationToSonatypeRepository -DLIBRARY_VERSION=${{ github.event.inputs.libraryVersion }}"
