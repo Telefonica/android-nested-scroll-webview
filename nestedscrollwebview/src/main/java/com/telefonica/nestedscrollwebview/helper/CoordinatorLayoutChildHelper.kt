@@ -17,8 +17,8 @@ class CoordinatorLayoutChildHelper {
         coordinatorChildView = null
         coordinatorParentView = null
 
-        var childView: View = view
-        while (childView.parent is View && coordinatorParentView == null) {
+        var childView: View? = view
+        while (childView?.parent is View && coordinatorParentView == null) {
             when(val viewParent: ViewParent = childView.parent) {
                 is CoordinatorLayout -> {
                     coordinatorParentView = viewParent
@@ -26,6 +26,8 @@ class CoordinatorLayoutChildHelper {
                 }
                 is View ->
                     childView = viewParent
+                else ->
+                    childView = null
             }
         }
     }
