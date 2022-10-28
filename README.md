@@ -36,6 +36,71 @@ If you are thinking on using the `android:fillViewport="false"` property for you
 
 NestedScrollWebview implementation avoids this "height issue", making webview to have correct viewport size, while working with a collapsable toolbar layout.
 
+## How to use it?
+
+Just include directly the `NestedScrollWebView` in your layout:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/app_bar_height"
+        android:theme="@style/Theme.NestedScrollWebViewDemo.AppBarOverlay">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:toolbarId="@+id/toolbar">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/Theme.NestedScrollWebViewDemo.PopupOverlay" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.telefonica.nestedscrollwebview.NestedScrollWebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+```
+
+## Configuration
+
+When expanding toolbar inside a CoordinatorLayout, instead of resizing the space left by the toolbar, it pushes down the content below.
+
+This may be an issue for example for pages where a fixed footer element is displayed. So, in order to correctly resize the webview viewport on these expands you can add this attribute to the NestedScrollWebView.
+
+`app:coordinatorBottomMatchingEnabled={"true"|"false"}`
+
+This is disabled by default, as webview resizing is expensive.
+
+```xml
+<com.telefonica.nestedscrollwebview.NestedScrollWebView
+    android:id="@+id/webView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:coordinatorBottomMatchingEnabled="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+```
+
 ## Videos
 <table>
 <tr>
