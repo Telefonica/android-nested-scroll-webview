@@ -101,6 +101,14 @@ This is disabled by default, as webview resizing is expensive.
     app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 ```
 
+## How we do it?
+
+Implementation extends [WebView](https://developer.android.com/reference/android/webkit/WebView) applying nested scrolling code logic from androidx.core [NestedScrollView](https://developer.android.com/reference/androidx/core/widget/NestedScrollView).
+
+## Known issues, considerations and Future improvements
+
+* As implementation relies on NestedScrollView touch events interception, in cases there are web content elements that intercept movement events, for example a map view or a horizontal carousel, these movement events will be interpreted also as scrolling events for nested scrolling. We are thinking on a solution to prevent this. 
+
 ## Videos
 <table>
 <tr>
