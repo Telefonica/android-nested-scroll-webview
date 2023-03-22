@@ -10,6 +10,7 @@ plugins {
     id 'com.android.library' version '7.2.2' apply false
     id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
     id 'io.gitlab.arturbosch.detekt' version '1.18.1'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0' apply false
 }
 
 detekt {
@@ -30,15 +31,6 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-apply plugin: 'io.codearte.nexus-staging'
-
-nexusStaging {
-    packageGroup = "com.telefonica"
-    stagingProfileId = "f7fe7699e57a"
-    username = System.getenv("MOBILE_MAVENCENTRAL_USER")
-    password = System.getenv("MOBILE_MAVENCENTRAL_PASSWORD")
-}
-
 allprojects {
     group = 'com.telefonica.nestedscrollwebview'
     if (System.getProperty("SNAPSHOT_VERSION") != null) {
@@ -47,3 +39,5 @@ allprojects {
         version = System.getProperty("LIBRARY_VERSION") ?: "undefined"
     }
 }
+
+apply from: "${rootProject.projectDir}/publish_maven_central.gradle"
