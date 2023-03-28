@@ -22,4 +22,12 @@ jobs:
           wrapper-cache-enabled: false
           dependencies-cache-enabled: false
           configuration-cache-enabled: false
-          arguments: assembleRelease check detekt
+          arguments: assembleRelease
+
+      - name: Run checks
+        if: success() || failure()
+        run: ./gradlew check
+
+      - name: Run Detekt
+        if: success() || failure()
+        run: ./gradlew detekt
