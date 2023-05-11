@@ -660,6 +660,37 @@ public class NestedScrollViewHelper implements NestedScrollingChild3 {
 	}
 
 	/*
+	Functions not present in original NestedScrollView implementation, but may required
+	by specific views using this helper.
+	*/
+
+	public void dispatchOverScrollIfNotBeingDragged(
+			int deltaX,
+			int deltaY,
+			int scrollX,
+			int scrollY,
+			int scrollRangeX,
+			int scrollRangeY,
+			int maxOverScrollX,
+			int maxOverScrollY,
+			boolean isTouchEvent
+	) {
+		if (!mIsBeingDragged) {
+			overScrollByCompat(
+					deltaX,
+					deltaY,
+					scrollX,
+					scrollY,
+					scrollRangeX,
+					scrollRangeY,
+					maxOverScrollX,
+					maxOverScrollY,
+					isTouchEvent
+			);
+		}
+	}
+
+	/*
 	Required NestedScrollView methods implementation dependencies. As this class
 	does not inherit from any specific View, and we want to have NestedScrollView code as
 	original as possible, we provide required functions below.

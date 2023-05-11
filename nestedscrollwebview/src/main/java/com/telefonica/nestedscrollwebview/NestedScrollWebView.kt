@@ -109,7 +109,6 @@ open class NestedScrollWebView : WebView, NestedScrollingChild3 {
         coordinatorLayoutChildHelper.onViewAttached(this)
     }
 
-    // Disabled to avoid double over-scrolling.
     override fun overScrollBy(
         deltaX: Int,
         deltaY: Int,
@@ -120,8 +119,20 @@ open class NestedScrollWebView : WebView, NestedScrollingChild3 {
         maxOverScrollX: Int,
         maxOverScrollY: Int,
         isTouchEvent: Boolean
-    ): Boolean =
-        true
+    ): Boolean {
+        nestedScrollingChildHelper.dispatchOverScrollIfNotBeingDragged(
+            deltaX,
+            deltaY,
+            scrollX,
+            scrollY,
+            scrollRangeX,
+            scrollRangeY,
+            maxOverScrollX,
+            maxOverScrollY,
+            isTouchEvent
+        )
+        return true
+    }
 
     // Delegation of all NestedScrollingChild3 methods
     override fun dispatchNestedScroll(
