@@ -84,13 +84,17 @@ Just include directly the `NestedScrollWebView` in your layout:
 
 ## Configuration
 
+Utility methods for specific WebView content requirements.
+
+### Adjust WebView bottom margin to match CoordinatorLayout visible space
+
 When expanding toolbar inside a CoordinatorLayout, instead of resizing the space left by the toolbar, it pushes down the content below.
 
 This may be an issue for example for pages where a fixed footer element is displayed. So, in order to correctly resize the webview viewport on these expands you can add this attribute to the NestedScrollWebView.
 
 `app:coordinatorBottomMatchingEnabled={"true"|"false"}`
 
-This is disabled by default, as webview resizing is expensive.
+This is **disabled by default**, as webview resizing is expensive.
 
 ```xml
 <com.telefonica.nestedscrollwebview.NestedScrollWebView
@@ -101,13 +105,26 @@ This is disabled by default, as webview resizing is expensive.
     app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 ```
 
+### Block vertical nested scrolling on WebView internal elements scrolls
+
+If your WebView content includes scrollable elements such as horizontal carousels or map views, nested scrolling should not be performed when scrolling these.
+
+`app:blockNestedScrollingOnInternalContentScrolls={"true"|"false"}`
+
+This is **enabled by default**, but can be disabled with this flag in case it does not work properly in any specific situation.
+
+```xml
+<com.telefonica.nestedscrollwebview.NestedScrollWebView
+    android:id="@+id/webView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:blockNestedScrollingOnInternalContentScrolls="false"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+```
+
 ## How we do it?
 
 Implementation extends [WebView](https://developer.android.com/reference/android/webkit/WebView) applying nested scrolling code logic from androidx.core [NestedScrollView](https://developer.android.com/reference/androidx/core/widget/NestedScrollView).
-
-## Known issues, considerations and Future improvements
-
-* As implementation relies on NestedScrollView touch events interception, in cases there are web content elements that intercept movement events, for example a map view or a horizontal carousel, these movement events will be interpreted also as scrolling events for nested scrolling. We are thinking on a solution to prevent this. 
 
 ## Videos
 <table>
