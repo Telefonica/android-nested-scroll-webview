@@ -34,13 +34,15 @@ class InternalScrollDetector {
             }
             MotionEvent.ACTION_MOVE -> {
                 val activePointerIndex = event.findPointerIndex(activePointerId)
-                if (activePointerIndex == -1 || initialX == null || initialY == null) {
+                val initialEventY = initialY
+                val initialEventX = initialX
+                if (activePointerIndex == -1 || initialEventY == null || initialEventX == null) {
                     false
                 } else {
                     val y = event.getY(activePointerIndex)
                     val x = event.getX(activePointerIndex)
-                    val deltaY: Float = initialY!! - y
-                    val deltaX: Float = initialX!! - x
+                    val deltaY: Float = initialEventY - y
+                    val deltaX: Float = initialEventX - x
                     val anyMovement = deltaX != 0f || deltaY != 0f
                     if (!isScrolling && anyMovement) {
                         isScrolling = true
