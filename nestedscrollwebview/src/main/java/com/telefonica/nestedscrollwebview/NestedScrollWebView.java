@@ -96,7 +96,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
     }
 
     /* NestedScrollView class code block.
-	Following functionality has been directly extracted from NestedScrollView
+    Following functionality has been directly extracted from NestedScrollView
     class (Android Support Library Compat 1.8.0), keeping original code unaltered as
     much as possible, this way this part could be easily updated in the future if needed:
     * NestedScrollView.onTouchEvent(@NonNull MotionEvent ev) implementation
@@ -172,14 +172,14 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
 
         initScrollView();
 
-		/*
-		final TypedArray a = context.obtainStyledAttributes(
-				attrs, SCROLLVIEW_STYLEABLE, defStyleAttr, 0);
+        /*
+        final TypedArray a = context.obtainStyledAttributes(
+        		attrs, SCROLLVIEW_STYLEABLE, defStyleAttr, 0);
 
-		setFillViewport(a.getBoolean(0, false));
+        setFillViewport(a.getBoolean(0, false));
 
-		a.recycle();
-		*/
+        a.recycle();
+        */
 
         mChildHelper = new NestedScrollingChildHelper(this);
 
