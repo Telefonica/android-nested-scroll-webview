@@ -39,14 +39,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.widget.EdgeEffectCompat;
 
 import com.telefonica.nestedscrollwebview.helper.CoordinatorLayoutChildHelper;
-import com.telefonica.nestedscrollwebview.helper.HorizontalScrollDetector;
+import com.telefonica.nestedscrollwebview.helper.InternalScrollDetector;
 
 public class NestedScrollWebView extends WebView implements NestedScrollingChild3 {
 
     private final CoordinatorLayoutChildHelper coordinatorLayoutChildHelper =
             new CoordinatorLayoutChildHelper();
-    private final HorizontalScrollDetector horizontalScrollDetector =
-            new HorizontalScrollDetector();
+    private final InternalScrollDetector internalScrollDetector =
+            new InternalScrollDetector();
 
     public NestedScrollWebView(Context context) {
         super(context);
@@ -79,10 +79,10 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                                 false
                         )
                 );
-                horizontalScrollDetector.setEnabled(
+                internalScrollDetector.setEnabled(
                         styledAttrs.getBoolean(
-                                R.styleable.NestedScrollWebView_blockNestedScrollingOnHorizontalScrolls,
-                                false
+                                R.styleable.NestedScrollWebView_blockNestedScrollingOnInternalContentScrolls,
+                                true
                         )
                 );
             } finally {
@@ -200,13 +200,8 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
     }
 
-    public boolean onTouchEvent(@NonNull MotionEvent ev) {
-
-        /* Horizontal scroll blocking call not present on original NestedScrollView code*/
-        if (horizontalScrollDetector.onTouchEvent(ev)) {
-            return super.onTouchEvent(ev);
-        }
-
+    /* NestedScrollView onTouchEvent */
+    public void onNestedTouchEvent(@NonNull MotionEvent ev) {
         initVelocityTrackerIfNotExists();
 
         final int actionMasked = ev.getActionMasked();
@@ -374,8 +369,6 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
             mVelocityTracker.addMovement(vtev);
         }
         vtev.recycle();
-
-        return super.onTouchEvent(ev);
     }
 
     @Override
@@ -761,13 +754,22 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
 
     @Override
     protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
+        internalScrollDetector.onPageScrolled();
         super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
         post(coordinatorLayoutChildHelper::computeBottomMarginIfNeeded);
     }
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        horizontalScrollDetector.onScrollChanged(t, oldt);
+        internalScrollDetector.onPageScrolled();
         super.onScrollChanged(l, t, oldl, oldt);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!internalScrollDetector.onTouchEvent(event)) {
+            onNestedTouchEvent(event);
+        }
+        return super.onTouchEvent(event);
     }
 }

@@ -1,11 +1,11 @@
 package com.telefonica.nestedscrollwebview.helper
 
 import android.view.MotionEvent
-import kotlin.math.abs
 
-class HorizontalScrollDetector {
+class InternalScrollDetector {
 
-    private var isHorizontalScrollMovement: Boolean? = null
+    private var isScrolling: Boolean = false
+    private var pageScrollChangedWhileScrolling: Boolean = false
     private var initialX: Float? = null
     private var initialY: Float? = null
     private var activePointerId: Int = INVALID_POINTER
@@ -26,10 +26,10 @@ class HorizontalScrollDetector {
 
         return when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                reset()
                 initialX = event.x
                 initialY = event.y
                 activePointerId = event.getPointerId(0)
-                isHorizontalScrollMovement = null
                 false
             }
             MotionEvent.ACTION_MOVE -> {
@@ -42,32 +42,37 @@ class HorizontalScrollDetector {
                     val deltaY: Float = initialY!! - y
                     val deltaX: Float = initialX!! - x
                     val anyMovement = deltaX != 0f || deltaY != 0f
-                    if (isHorizontalScrollMovement == null && anyMovement) {
-                        isHorizontalScrollMovement = abs(deltaX) > abs(deltaY)
+                    if (!isScrolling && anyMovement) {
+                        isScrolling = true
                     }
-                    isHorizontalScrollMovement == true
+                    isInternalScroll()
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                val wasHorizontalScrollMovement: Boolean = isHorizontalScrollMovement == true
-                reset()
-                wasHorizontalScrollMovement
+                (isInternalScroll()).also {
+                    reset()
+                }
             }
             else -> false
         }
     }
 
-    fun onScrollChanged(oldY: Int, newY: Int) {
-        if (isEnabled && isHorizontalScrollMovement == true) {
-            isHorizontalScrollMovement = oldY == newY
+    fun onPageScrolled() {
+        if (isEnabled && isScrolling) {
+            pageScrollChangedWhileScrolling = true
         }
     }
 
     private fun reset() {
         initialX = null
         initialY = null
-        isHorizontalScrollMovement = null
+        activePointerId = INVALID_POINTER
+        isScrolling = false
+        pageScrollChangedWhileScrolling = false
     }
+
+    private fun isInternalScroll(): Boolean =
+        isScrolling && !pageScrollChangedWhileScrolling
 
     private companion object {
         const val INVALID_POINTER = -1

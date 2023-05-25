@@ -2,6 +2,6 @@
 <resources>
     <declare-styleable name="NestedScrollWebView">
         <attr name="coordinatorBottomMatchingEnabled" format="boolean" />
-        <attr name="blockNestedScrollingOnHorizontalScrolls" format="boolean" />
+        <attr name="blockNestedScrollingOnInternalContentScrolls" format="boolean" />
     </declare-styleable>
 </resources>
