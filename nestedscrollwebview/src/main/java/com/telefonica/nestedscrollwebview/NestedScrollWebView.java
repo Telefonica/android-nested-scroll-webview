@@ -746,6 +746,10 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         coordinatorLayoutChildHelper.setBottomMatchingBehaviourEnabled(enabled);
     }
 
+    public void setBlockNestedScrollingOnInternalContentScrollsEnabled(boolean enabled) {
+        internalScrollDetector.setEnabled(enabled);
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
