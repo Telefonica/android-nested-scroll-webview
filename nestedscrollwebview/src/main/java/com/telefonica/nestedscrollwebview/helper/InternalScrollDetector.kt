@@ -10,7 +10,7 @@ class InternalScrollDetector {
     private var initialY: Float? = null
     private var activePointerId: Int = INVALID_POINTER
 
-    private var isEnabled = false
+    private var isEnabled = true
 
     fun setEnabled(enabled: Boolean) {
         if (isEnabled != enabled) {
