@@ -208,6 +208,10 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
 
         if (actionMasked == MotionEvent.ACTION_DOWN) {
             mNestedYOffset = 0;
+            /* Not present on NestedScrollView code. We need to reset scroll offset on touch down,
+            as we found while testing that in some cases action was invoked with a non-zero scroll
+            offset, breaking page scroll. */
+            mScrollOffset[1] = 0;
         }
 
         MotionEvent vtev = MotionEvent.obtain(ev);
