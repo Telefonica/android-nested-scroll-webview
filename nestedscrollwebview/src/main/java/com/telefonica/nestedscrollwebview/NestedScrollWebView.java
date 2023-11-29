@@ -365,6 +365,13 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
             }
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
+                /* Code not present on NestedScrollView code.
+                Prevent crash on last motion update due an invalid pointerId. */
+                if (ev.findPointerIndex(mActivePointerId) == -1) {
+                    Log.e(TAG, "Invalid pointerId=" + mActivePointerId + " in onTouchEvent for ACTION_POINTER_UP");
+                    break;
+                }
+                /* End of code not present on NestedScrollView code. */
                 mLastMotionY = (int) ev.getY(ev.findPointerIndex(mActivePointerId));
                 break;
         }
