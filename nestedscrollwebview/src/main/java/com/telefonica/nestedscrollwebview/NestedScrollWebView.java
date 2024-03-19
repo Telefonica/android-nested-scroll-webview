@@ -333,9 +333,11 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
-                if ((Math.abs(initialVelocity) >= mMinimumVelocity)) {
-                    if (!edgeEffectFling(initialVelocity)
-                            && !dispatchNestedPreFling(0, -initialVelocity)) {
+
+                boolean preFling = dispatchNestedPreFling(0, -initialVelocity);
+                boolean edgeFling = edgeEffectFling(initialVelocity);
+                if (Math.abs(initialVelocity) >= mMinimumVelocity) {
+                    if (!edgeFling && !preFling) {
                         dispatchNestedFling(0, -initialVelocity, true);
                         fling(-initialVelocity);
                     }
