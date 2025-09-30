@@ -1,5 +1,5 @@
 ### :tickets: Jira ticket
-[LATCH-XXXX](https://jira.tid.es/browse/LATCH-XXXX)
+[ANDROID-XXXX](https://jira.tid.es/browse/ANDROID-XXXX)
 
 ### :goal_net: What's the goal?
 _Provide a description of the overall goal. The description in the Jira ticket may help._
