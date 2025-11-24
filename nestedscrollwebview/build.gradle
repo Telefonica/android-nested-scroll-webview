@@ -4,6 +4,8 @@ plugins {
 }
 
 android {
+    namespace 'com.telefonica.nestedscrollwebview'
+
     compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
@@ -25,7 +27,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'com.telefonica.nestedscrollwebview'
 }
 
 dependencies {
