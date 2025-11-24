@@ -1,0 +1,35 @@
+[versions]
+compileSdk = "31"
+minSdk = "21"
+targetSdk = "31"
+versionCode = "1"
+versionName = "1.0"
+agp = "8.13.1"
+kotlin = "1.8.0"
+kotlinAndroid = "1.6.21"
+nexusStaging = "0.30.0"
+nexusPublish = "1.3.0"
+detekt = "1.22.0"
+material = "1.6.1"
+appcompat = "1.4.2"
+constraintlayout = "2.1.4"
+swiperefresh = "1.1.0"
+junit4 = "4.13.2"
+
+[libraries]
+agp-buildscript = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+nexus-staging = { module = "io.codearte.gradle.nexus:gradle-nexus-staging-plugin", version.ref = "nexusStaging" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "kotlin" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefresh" }
+junit4 = { module = "junit:junit", version.ref = "junit4" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinAndroid" }
+nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPublish" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
