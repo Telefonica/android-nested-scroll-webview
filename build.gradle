@@ -3,18 +3,18 @@ import io.gitlab.arturbosch.detekt.Detekt
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.11.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0"
+        classpath libs.agp.buildscript
+        classpath libs.kotlin.gradle
+        classpath libs.nexus.staging
     }
 }
 
 plugins {
-    id 'com.android.application' version '8.11.2' apply false
-    id 'com.android.library' version '8.11.2' apply false
-    id 'org.jetbrains.kotlin.android' version '2.1.20' apply false
-    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0' apply false
-    id 'io.gitlab.arturbosch.detekt' version '1.23.8'
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.nexus.publish) apply false
+    alias(libs.plugins.detekt)
 }
 
 tasks.withType(Detekt).configureEach {

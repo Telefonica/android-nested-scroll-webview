@@ -1,17 +1,16 @@
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace 'com.telefonica.nestedscrollwebview'
 
-    compileSdk 34
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
-        minSdk 21
-        targetSdk 34
-
+        minSdk libs.versions.minSdk.get().toInteger()
+        targetSdk libs.versions.targetSdk.get().toInteger()
         consumerProguardFiles "consumer-rules.pro"
     }
 
@@ -31,10 +30,10 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.material)
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation(libs.junit4)
 }
 
 apply from: "${rootProject.projectDir}/mavencentral.gradle"
