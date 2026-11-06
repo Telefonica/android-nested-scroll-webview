@@ -124,6 +124,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
      * Position of the last motion event.
      */
     private int mLastMotionY;
+    private int mLastMotionX;
 
     /**
      * True if the user is currently dragging this ScrollView around. This is
@@ -152,8 +153,11 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
      */
     private final int[] mScrollOffset = new int[2];
     private final int[] mScrollConsumed = new int[2];
+
+    private int mNestedXOffset;
     private int mNestedYOffset;
 
+    private int mLastScrollerX;
     private int mLastScrollerY;
 
 
@@ -207,15 +211,17 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         final int actionMasked = ev.getActionMasked();
 
         if (actionMasked == MotionEvent.ACTION_DOWN) {
+            mNestedXOffset = 0;
             mNestedYOffset = 0;
             /* Not present on NestedScrollView code. We need to reset scroll offset on touch down,
             as we found while testing that in some cases action was invoked with a non-zero scroll
             offset, breaking page scroll. */
+            mScrollOffset[0] = 0;
             mScrollOffset[1] = 0;
         }
 
         MotionEvent vtev = MotionEvent.obtain(ev);
-        vtev.offsetLocation(0, mNestedYOffset);
+        vtev.offsetLocation(mNestedXOffset, mNestedYOffset);
 
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN: {
@@ -239,7 +245,9 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                 }
 
                 // Remember where the motion event started
+                mLastMotionX = (int) ev.getX();
                 mLastMotionY = (int) ev.getY();
+
                 mActivePointerId = ev.getPointerId(0);
                 startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL, ViewCompat.TYPE_TOUCH);
                 break;
@@ -252,7 +260,9 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                 }
 
                 final int y = (int) ev.getY(activePointerIndex);
+                final int x = (int) ev.getX(activePointerIndex);
                 int deltaY = mLastMotionY - y;
+                int deltaX = mLastMotionX - x;
                 deltaY -= releaseVerticalGlow(deltaY, ev.getX(activePointerIndex));
                 if (!mIsBeingDragged && Math.abs(deltaY) > mTouchSlop) {
                     final ViewParent parent = getParent();
@@ -268,41 +278,60 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                 }
                 if (mIsBeingDragged) {
                     // Start with nested pre scrolling
-                    if (dispatchNestedPreScroll(0, deltaY, mScrollConsumed, mScrollOffset,
+                    if (dispatchNestedPreScroll(deltaX, deltaY, mScrollConsumed, mScrollOffset,
                             ViewCompat.TYPE_TOUCH)) {
+                        deltaX -= mScrollConsumed[0];
                         deltaY -= mScrollConsumed[1];
+
+                        mNestedXOffset += mScrollOffset[0];
                         mNestedYOffset += mScrollOffset[1];
                     }
 
                     // Scroll to follow the motion event
+                    mLastMotionX = x - mScrollOffset[0];
                     mLastMotionY = y - mScrollOffset[1];
 
+                    final int oldX = getScrollX();
                     final int oldY = getScrollY();
-                    final int range = getScrollRange();
+
+                    final int rangeVertical = getVerticalScrollRange();
+                    final int rangeHorizontal = getHorizontalScrollRange();
                     final int overscrollMode = getOverScrollMode();
+
+                    // TODO check for horizontal
                     boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS
-                            || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+                            || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && rangeVertical > 0);
 
                     // Calling overScrollByCompat will call onOverScrolled, which
                     // calls onScrollChanged if applicable.
                     boolean clearVelocityTracker =
-                            overScrollByCompat(0, deltaY, 0, getScrollY(), 0, range, 0,
+                            overScrollByCompat(deltaX, deltaY, getScrollX(), getScrollY(), rangeHorizontal, rangeVertical, 0,
                                     0, true) && !hasNestedScrollingParent(ViewCompat.TYPE_TOUCH);
+
+                    final int scrolledDeltaX = getScrollX() - oldX;
+                    final int unconsumedX = deltaX - scrolledDeltaX;
 
                     final int scrolledDeltaY = getScrollY() - oldY;
                     final int unconsumedY = deltaY - scrolledDeltaY;
 
+                    mScrollConsumed[0] = 0;
                     mScrollConsumed[1] = 0;
 
-                    dispatchNestedScroll(0, scrolledDeltaY, 0, unconsumedY, mScrollOffset,
+                    dispatchNestedScroll(scrolledDeltaX, scrolledDeltaY, unconsumedX, unconsumedY, mScrollOffset,
                             ViewCompat.TYPE_TOUCH, mScrollConsumed);
 
+                    mLastMotionX -= mScrollOffset[0];
                     mLastMotionY -= mScrollOffset[1];
+
+                    mNestedXOffset += mScrollOffset[0];
                     mNestedYOffset += mScrollOffset[1];
 
+                    // TODO EdgeEffect for X
                     if (canOverscroll) {
                         deltaY -= mScrollConsumed[1];
+
                         final int pulledToY = oldY + deltaY;
+
                         if (pulledToY < 0) {
                             EdgeEffectCompat.onPullDistance(mEdgeGlowTop,
                                     (float) -deltaY / getHeight(),
@@ -310,7 +339,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
-                        } else if (pulledToY > range) {
+                        } else if (pulledToY > rangeVertical) {
                             EdgeEffectCompat.onPullDistance(mEdgeGlowBottom,
                                     (float) deltaY / getHeight(),
                                     1.f - ev.getX(activePointerIndex) / getWidth());
@@ -332,16 +361,19 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
             case MotionEvent.ACTION_UP:
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
-                if ((Math.abs(initialVelocity) >= mMinimumVelocity)) {
-                    if (!edgeEffectFling(initialVelocity)
-                            && !dispatchNestedPreFling(0, -initialVelocity)) {
-                        dispatchNestedFling(0, -initialVelocity, true);
-                        fling(-initialVelocity);
+
+                int initialVelocityX = (int) velocityTracker.getXVelocity(mActivePointerId);
+                int initialVelocityY = (int) velocityTracker.getYVelocity(mActivePointerId);
+
+                if ((Math.abs(initialVelocityY) >= mMinimumVelocity) || Math.abs(initialVelocityX) >= mMinimumVelocity) {
+                    if (!edgeEffectFling(initialVelocityX, initialVelocityY)
+                            && !dispatchNestedPreFling(-initialVelocityX, -initialVelocityY)) {
+                        dispatchNestedFling(-initialVelocityX, -initialVelocityY, true);
+                        fling(-initialVelocityX, -initialVelocityY);
                     }
-                } else if (mScroller.springBack(getScrollX(), getScrollY(), 0, 0, 0,
-                        getScrollRange())) {
-                    ViewCompat.postInvalidateOnAnimation(this);
+                } else if (mScroller.springBack(getScrollX(), getScrollY(), 0, getHorizontalScrollRange(), 0,
+                        getVerticalScrollRange())) {
+                    this.postInvalidateOnAnimation();
                 }
                 mActivePointerId = INVALID_POINTER;
                 endDrag();
@@ -349,9 +381,9 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
             case MotionEvent.ACTION_CANCEL:
                 // WebView always return no children
                 if (mIsBeingDragged /* && getChildCount() > 0*/) {
-                    if (mScroller.springBack(getScrollX(), getScrollY(), 0, 0, 0,
-                            getScrollRange())) {
-                        ViewCompat.postInvalidateOnAnimation(this);
+                    if (mScroller.springBack(getScrollX(), getScrollY(), 0, getHorizontalScrollRange(), 0,
+                            getVerticalScrollRange())) {
+                        this.postInvalidateOnAnimation();
                     }
                 }
                 mActivePointerId = INVALID_POINTER;
@@ -359,6 +391,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                 break;
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int index = ev.getActionIndex();
+                mLastMotionX = (int) ev.getX(index);
                 mLastMotionY = (int) ev.getY(index);
                 mActivePointerId = ev.getPointerId(index);
                 break;
@@ -372,6 +405,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                     break;
                 }
                 /* End of code not present on NestedScrollView code. */
+                mLastMotionX = (int) ev.getX(ev.findPointerIndex(mActivePointerId));
                 mLastMotionY = (int) ev.getY(ev.findPointerIndex(mActivePointerId));
                 break;
         }
@@ -390,38 +424,57 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         }
 
         mScroller.computeScrollOffset();
+
+        final int x = mScroller.getCurrX();
         final int y = mScroller.getCurrY();
-        int unconsumed = y - mLastScrollerY;
+
+        int unconsumedX = x - mLastScrollerX;
+        int unconsumedY = y - mLastScrollerY;
+
+        mLastScrollerX = x;
         mLastScrollerY = y;
 
         // Nested Scrolling Pre Pass
+        mScrollConsumed[0] = 0;
         mScrollConsumed[1] = 0;
-        dispatchNestedPreScroll(0, unconsumed, mScrollConsumed, null,
+
+        dispatchNestedPreScroll(unconsumedX, unconsumedY, mScrollConsumed, null,
                 ViewCompat.TYPE_NON_TOUCH);
-        unconsumed -= mScrollConsumed[1];
 
-        final int range = getScrollRange();
+        unconsumedX -= mScrollConsumed[0];
+        unconsumedY -= mScrollConsumed[1];
 
-        if (unconsumed != 0) {
+        final int horizontalRange = getHorizontalScrollRange();
+        final int verticalRange = getVerticalScrollRange();
+
+        if (unconsumedY != 0 || unconsumedX != 0) {
             // Internal Scroll
             final int oldScrollY = getScrollY();
-            overScrollByCompat(0, unconsumed, getScrollX(), oldScrollY, 0, range, 0, 0, false);
-            final int scrolledByMe = getScrollY() - oldScrollY;
-            unconsumed -= scrolledByMe;
+            final int oldScrollX = getScrollX();
+            overScrollByCompat(unconsumedX, unconsumedY, oldScrollX, oldScrollY, horizontalRange, verticalRange, 0, 0, false);
+
+            final int scrolledByMeX = getScrollX() - oldScrollX;
+            final int scrolledByMeY = getScrollY() - oldScrollY;
+
+            unconsumedX -= scrolledByMeX;
+            unconsumedY -= scrolledByMeY;
 
             // Nested Scrolling Post Pass
+            mScrollConsumed[0] = 0;
             mScrollConsumed[1] = 0;
-            dispatchNestedScroll(0, scrolledByMe, 0, unconsumed, mScrollOffset,
+            dispatchNestedScroll(scrolledByMeX, scrolledByMeY, unconsumedX, unconsumedY, mScrollOffset,
                     ViewCompat.TYPE_NON_TOUCH, mScrollConsumed);
-            unconsumed -= mScrollConsumed[1];
+            unconsumedY -= mScrollConsumed[1];
         }
 
-        if (unconsumed != 0) {
+        // TODO add overscroll glow for X
+
+        if (unconsumedY != 0) {
             final int mode = getOverScrollMode();
             final boolean canOverscroll = mode == OVER_SCROLL_ALWAYS
-                    || (mode == OVER_SCROLL_IF_CONTENT_SCROLLS && range > 0);
+                    || (mode == OVER_SCROLL_IF_CONTENT_SCROLLS && verticalRange > 0);
             if (canOverscroll) {
-                if (unconsumed < 0) {
+                if (unconsumedY < 0) {
                     if (mEdgeGlowTop.isFinished()) {
                         mEdgeGlowTop.onAbsorb((int) mScroller.getCurrVelocity());
                     }
@@ -537,7 +590,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         }
 
         if (clampedY && !hasNestedScrollingParent(ViewCompat.TYPE_NON_TOUCH)) {
-            mScroller.springBack(newScrollX, newScrollY, 0, 0, 0, getScrollRange());
+            mScroller.springBack(newScrollX, newScrollY, 0, getHorizontalScrollRange(), 0, getVerticalScrollRange());
         }
 
         onOverScrolled(newScrollX, newScrollY, clampedX, clampedY);
@@ -545,7 +598,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         return clampedX || clampedY;
     }
 
-    private boolean edgeEffectFling(int velocityY) {
+    private boolean edgeEffectFling(int velocityX, int velocityY) {
         boolean consumed = true;
         if (EdgeEffectCompat.getDistance(mEdgeGlowTop) != 0) {
             mEdgeGlowTop.onAbsorb(velocityY);
@@ -564,17 +617,27 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
      *                  numbers mean that the finger/cursor is moving down the screen,
      *                  which means we want to scroll towards the top.
      */
-    public void fling(int velocityY) {
-        // WebView always returns no children
-        //if (getChildCount() > 0) {
+    public void fling(int velocityX, int velocityY) {
+        if (!canScrollHorizontally(1) && !canScrollHorizontally(-1))
+            velocityX = 0;
+        if (!canScrollVertically(-1) && !canScrollVertically(1))
+            velocityY = 0;
 
+        if (Math.abs(velocityX) > Math.abs(velocityY)) {
             mScroller.fling(getScrollX(), getScrollY(), // start
-                    0, velocityY, // velocities
+                    velocityX, velocityY, // velocities
+                    Integer.MIN_VALUE, Integer.MAX_VALUE, // x
+                    0, 0, // y
+                    0, 0); // overscroll
+        } else {
+            mScroller.fling(getScrollX(), getScrollY(), // start
+                    velocityX, velocityY, // velocities
                     0, 0, // x
                     Integer.MIN_VALUE, Integer.MAX_VALUE, // y
                     0, 0); // overscroll
-            runAnimatedScroll(true);
-        //}
+        }
+
+        runAnimatedScroll(true);
     }
 
     private void runAnimatedScroll(boolean participateInNestedScrolling) {
@@ -583,6 +646,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         } else {
             stopNestedScroll(ViewCompat.TYPE_NON_TOUCH);
         }
+        mLastScrollerX = getScrollX();
         mLastScrollerY = getScrollY();
         ViewCompat.postInvalidateOnAnimation(this);
     }
@@ -612,7 +676,10 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
             // active pointer and adjust accordingly.
             // TODO: Make this decision more intelligent.
             final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+
+            mLastMotionX = (int) ev.getX(newPointerIndex);
             mLastMotionY = (int) ev.getY(newPointerIndex);
+
             mActivePointerId = ev.getPointerId(newPointerIndex);
             if (mVelocityTracker != null) {
                 mVelocityTracker.clear();
@@ -747,8 +814,12 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         return ViewCompat.SCROLL_AXIS_VERTICAL;
     }
 
-    private int getScrollRange() {
+    private int getVerticalScrollRange() {
         return computeVerticalScrollRange();
+    }
+
+    private int getHorizontalScrollRange() {
+        return computeHorizontalScrollRange();
     }
 
     /* Extra functionalities */
