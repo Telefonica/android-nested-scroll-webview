@@ -26,6 +26,9 @@ class ScrollingActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
+        binding.bottomFab.setOnClickListener {
+            binding.webView.evaluateJavascript("document.body.classList.toggle('expanded');", null)
+        }
         WebView.setWebContentsDebuggingEnabled(true)
         binding.webView.apply {
             with(settings) {
