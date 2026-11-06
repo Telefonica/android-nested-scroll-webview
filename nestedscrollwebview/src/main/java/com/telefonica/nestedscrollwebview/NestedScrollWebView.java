@@ -906,7 +906,10 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!internalScrollDetector.onTouchEvent(event)) {
+        if (event.getPointerCount() > 1) {
+            mIsBeingDragged = false;
+            stopNestedScroll(ViewCompat.TYPE_TOUCH);
+        } else if (!internalScrollDetector.onTouchEvent(event)) {
             onNestedTouchEvent(event);
         }
         return super.onTouchEvent(event);
