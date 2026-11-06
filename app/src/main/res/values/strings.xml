@@ -4,4 +4,5 @@
 
     <string name="action_set_coordinator_bottom_matching_behaviour">Match coordinator bottom behaviour</string>
     <string name="action_set_regular_behaviour">Regular behaviour</string>
+    <string name="fab_toggle_webview_width">toggle width</string>
 </resources>

@@ -56,4 +56,15 @@
         app:layout_anchorGravity="bottom|end"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/bottom_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/fab_margin"
+        app:layout_anchor="@id/webView"
+        app:layout_anchorGravity="bottom|end"
+        android:text="@string/fab_toggle_webview_width"
+        />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
