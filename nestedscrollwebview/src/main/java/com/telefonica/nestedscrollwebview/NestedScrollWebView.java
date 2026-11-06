@@ -523,7 +523,6 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                     }
                 }
             }
-            abortAnimatedScroll();
         }
 
         if (unconsumedX != 0) {
@@ -541,8 +540,12 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                     }
                 }
             }
+        }
+
+        if (unconsumedX != 0 && unconsumedY != 0) {
             abortAnimatedScroll();
         }
+
         if (!mScroller.isFinished()) {
             ViewCompat.postInvalidateOnAnimation(this);
         } else {
@@ -679,19 +682,13 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
         if (!canScrollVertically(-1) && !canScrollVertically(1))
             velocityY = 0;
 
-        if (Math.abs(velocityX) > Math.abs(velocityY)) {
-            mScroller.fling(getScrollX(), getScrollY(), // start
-                    velocityX, velocityY, // velocities
-                    Integer.MIN_VALUE, Integer.MAX_VALUE, // x
-                    0, 0, // y
-                    0, 0); // overscroll
-        } else {
-            mScroller.fling(getScrollX(), getScrollY(), // start
-                    velocityX, velocityY, // velocities
-                    0, 0, // x
-                    Integer.MIN_VALUE, Integer.MAX_VALUE, // y
-                    0, 0); // overscroll
-        }
+        mScroller.fling(
+            getScrollX(), getScrollY(), // start
+            velocityX, velocityY, // velocities
+            Integer.MIN_VALUE, Integer.MAX_VALUE, // x
+            Integer.MIN_VALUE, Integer.MAX_VALUE, // y
+            0, 0 // overscroll
+        );
 
         runAnimatedScroll(true);
     }
