@@ -120,6 +120,18 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
     @NonNull
     public EdgeEffect mEdgeGlowBottom;
 
+    /** @hide */
+    @RestrictTo(LIBRARY)
+    @VisibleForTesting
+    @NonNull
+    public EdgeEffect mEdgeGlowLeft;
+
+    /** @hide */
+    @RestrictTo(LIBRARY)
+    @VisibleForTesting
+    @NonNull
+    public EdgeEffect mEdgeGlowRight;
+
     /**
      * Position of the last motion event.
      */
@@ -173,6 +185,8 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
     public void initNestedScrollView(@NonNull Context context, @Nullable AttributeSet attrs/*, int defStyleAttr*/) {
         mEdgeGlowTop = EdgeEffectCompat.create(context, attrs);
         mEdgeGlowBottom = EdgeEffectCompat.create(context, attrs);
+        mEdgeGlowLeft = EdgeEffectCompat.create(context, attrs);
+        mEdgeGlowRight = EdgeEffectCompat.create(context, attrs);
 
         initScrollView();
 
@@ -249,7 +263,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                 mLastMotionY = (int) ev.getY();
 
                 mActivePointerId = ev.getPointerId(0);
-                startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL, ViewCompat.TYPE_TOUCH);
+                startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL | ViewCompat.SCROLL_AXIS_HORIZONTAL, ViewCompat.TYPE_TOUCH);
                 break;
             }
             case MotionEvent.ACTION_MOVE:
@@ -298,9 +312,11 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                     final int rangeHorizontal = getHorizontalScrollRange();
                     final int overscrollMode = getOverScrollMode();
 
-                    // TODO check for horizontal
-                    boolean canOverscroll = overscrollMode == OVER_SCROLL_ALWAYS
+                    boolean canOverscrollVertically = overscrollMode == OVER_SCROLL_ALWAYS
                             || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && rangeVertical > 0);
+
+                    boolean canOverscrollHorizontally = overscrollMode == OVER_SCROLL_ALWAYS
+                            || (overscrollMode == OVER_SCROLL_IF_CONTENT_SCROLLS && rangeHorizontal > 0);
 
                     // Calling overScrollByCompat will call onOverScrolled, which
                     // calls onScrollChanged if applicable.
@@ -326,8 +342,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                     mNestedXOffset += mScrollOffset[0];
                     mNestedYOffset += mScrollOffset[1];
 
-                    // TODO EdgeEffect for X
-                    if (canOverscroll) {
+                    if (canOverscrollVertically) {
                         deltaY -= mScrollConsumed[1];
 
                         final int pulledToY = oldY + deltaY;
@@ -348,6 +363,32 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
                             }
                         }
                         if (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished()) {
+                            ViewCompat.postInvalidateOnAnimation(this);
+                            clearVelocityTracker = false;
+                        }
+                    }
+
+                    if (canOverscrollHorizontally) {
+                        deltaX -= mScrollConsumed[0];
+
+                        final int pulledToX = oldX + deltaX;
+
+                        if (pulledToX < 0) {
+                            EdgeEffectCompat.onPullDistance(mEdgeGlowLeft,
+                                    (float) -deltaX / getWidth(),
+                                    ev.getY(activePointerIndex) / getHeight());
+                            if (!mEdgeGlowRight.isFinished()) {
+                                mEdgeGlowRight.onRelease();
+                            }
+                        } else if (pulledToX > rangeHorizontal) {
+                            EdgeEffectCompat.onPullDistance(mEdgeGlowRight,
+                                    (float) deltaX / getWidth(),
+                                    1.f - ev.getY(activePointerIndex) / getHeight());
+                            if (!mEdgeGlowLeft.isFinished()) {
+                                mEdgeGlowLeft.onRelease();
+                            }
+                        }
+                        if (!mEdgeGlowLeft.isFinished() || !mEdgeGlowRight.isFinished()) {
                             ViewCompat.postInvalidateOnAnimation(this);
                             clearVelocityTracker = false;
                         }
@@ -467,8 +508,6 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
             unconsumedY -= mScrollConsumed[1];
         }
 
-        // TODO add overscroll glow for X
-
         if (unconsumedY != 0) {
             final int mode = getOverScrollMode();
             final boolean canOverscroll = mode == OVER_SCROLL_ALWAYS
@@ -487,6 +526,23 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
             abortAnimatedScroll();
         }
 
+        if (unconsumedX != 0) {
+            final int mode = getOverScrollMode();
+            final boolean canOverscroll = mode == OVER_SCROLL_ALWAYS
+                    || (mode == OVER_SCROLL_IF_CONTENT_SCROLLS && horizontalRange > 0);
+            if (canOverscroll) {
+                if (unconsumedX < 0) {
+                    if (mEdgeGlowLeft.isFinished()) {
+                        mEdgeGlowLeft.onAbsorb((int) mScroller.getCurrVelocity());
+                    }
+                } else {
+                    if (mEdgeGlowRight.isFinished()) {
+                        mEdgeGlowRight.onAbsorb((int) mScroller.getCurrVelocity());
+                    }
+                }
+            }
+            abortAnimatedScroll();
+        }
         if (!mScroller.isFinished()) {
             ViewCompat.postInvalidateOnAnimation(this);
         } else {
@@ -642,7 +698,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
 
     private void runAnimatedScroll(boolean participateInNestedScrolling) {
         if (participateInNestedScrolling) {
-            startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL, ViewCompat.TYPE_NON_TOUCH);
+            startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL | ViewCompat.SCROLL_AXIS_HORIZONTAL, ViewCompat.TYPE_NON_TOUCH);
         } else {
             stopNestedScroll(ViewCompat.TYPE_NON_TOUCH);
         }
@@ -811,7 +867,7 @@ public class NestedScrollWebView extends WebView implements NestedScrollingChild
 
     @Override
     public int getNestedScrollAxes() {
-        return ViewCompat.SCROLL_AXIS_VERTICAL;
+        return ViewCompat.SCROLL_AXIS_VERTICAL | SCROLL_AXIS_HORIZONTAL;
     }
 
     private int getVerticalScrollRange() {
