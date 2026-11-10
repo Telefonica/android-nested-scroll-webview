@@ -6,7 +6,6 @@ versionCode = "1"
 versionName = "1.0"
 agp = "9.5.1"
 kotlin = "1.8.0"
-kotlinAndroid = "2.4.21"
 nexusStaging = "0.30.0"
 nexusPublish = "2.0.0"
 detekt = "1.23.8"
@@ -30,6 +29,5 @@ junit4 = { module = "junit:junit", version.ref = "junit4" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinAndroid" }
 nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPublish" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
