@@ -6,11 +6,10 @@ plugins {
 android {
     namespace 'com.telefonica.nestedscrollwebview'
 
-    compileSdk libs.versions.compileSdk.get().toInteger()
+    compileSdk = libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
         minSdk libs.versions.minSdk.get().toInteger()
-        targetSdk libs.versions.targetSdk.get().toInteger()
         consumerProguardFiles "consumer-rules.pro"
     }
 
@@ -26,6 +25,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    lint {
+        targetSdk 34
+    }
+    testOptions {
+        targetSdk 34
     }
 }
 
