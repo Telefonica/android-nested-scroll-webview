@@ -1,19 +1,18 @@
 [versions]
-compileSdk = "34"
-minSdk = "21"
-targetSdk = "34"
+compileSdk = "37"
+minSdk = "23"
+targetSdk = "37"
 versionCode = "1"
 versionName = "1.0"
-agp = "8.13.1"
-kotlin = "1.8.0"
-kotlinAndroid = "2.1.20"
+agp = "9.5.1"
+kotlin = "1.19.1"
 nexusStaging = "0.30.0"
 nexusPublish = "2.0.0"
 detekt = "1.23.8"
-material = "1.6.1"
-appcompat = "1.4.2"
-constraintlayout = "2.1.4"
-swiperefresh = "1.1.0"
+material = "1.14.0"
+appcompat = "1.8.0"
+constraintlayout = "2.2.2"
+swiperefresh = "1.2.0"
 junit4 = "4.13.2"
 
 [libraries]
@@ -30,6 +29,5 @@ junit4 = { module = "junit:junit", version.ref = "junit4" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinAndroid" }
 nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPublish" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
